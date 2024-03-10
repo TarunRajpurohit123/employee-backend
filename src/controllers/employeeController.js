@@ -219,6 +219,134 @@ const employeeController = {
       });
     }
   },
+
+  // charts APIs
+
+  statusChart: async (req, res) => {
+    try {
+      const statuses = await prisma.employeeStatus.findMany();
+      const totalEmployees = await prisma.employee.count();
+
+      const chartData = await Promise.all(
+        statuses.map(async (status) => {
+          const employeesCount = await prisma.employee.count({
+            where: {
+              employeeStatusId: status.id,
+            },
+          });
+
+          const percentage = (employeesCount / totalEmployees) * 100;
+
+          return {
+            status: status.status,
+            count: employeesCount,
+            percentage: percentage.toFixed(2), // Adjust decimal places as needed
+          };
+        })
+      );
+
+      res.status(200).json({
+        success: true,
+        data: {
+          totalEmployees,
+          chartData,
+        },
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "something went wrong",
+        error: error.message,
+      });
+    }
+  },
+
+  salaryChart: async (req, res) => {
+    const { gap } = req.query;
+    try {
+      // Get the minimum and maximum salary values from the database
+      const minmax = await prisma.employee.aggregate({
+        _max: { SalaryDetails: true },
+      });
+      let maxSalary = minmax._max.SalaryDetails;
+      // console.log("minSalary", minSalary);
+      // console.log("maxSalary", maxSalary);
+      // Define the dynamic salary ranges with a step of 50000
+      const step = Number(gap);
+      const salaryRanges = [];
+      for (let i = 0; i <= maxSalary; i += step) {
+        salaryRanges.push({ min: i, max: i + step - 1 });
+      }
+      const totalEmployees = await prisma.employee.count();
+      // Fetch employees within each salary range
+      const salaryChartData = await Promise.all(
+        salaryRanges.map(async (range) => {
+          const employeesCount = await prisma.employee.count({
+            where: {
+              SalaryDetails: {
+                gte: range.min,
+                lte: range.max,
+              },
+            },
+          });
+          const percentage = (employeesCount / totalEmployees) * 100;
+          return {
+            range: `${range.min} - ${range.max}`,
+            count: employeesCount,
+            percentage: percentage.toFixed(2), // Adjust decimal places as needed
+          };
+        })
+      );
+
+      res.status(200).json({
+        salaryChartData,
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "something went wrong",
+        error: error.message,
+      });
+    }
+  },
+
+  locationChart: async (req, res) => {
+    try {
+      const locations = await prisma.employee.groupBy({
+        by: ["Address"],
+        _count: {
+          _all: true,
+        },
+      });
+
+      const totalEmployees = await prisma.employee.count();
+
+      const locationChartData = locations.map((location) => {
+        const employeesCount = location._count._all;
+        const percentage = (employeesCount / totalEmployees) * 100;
+
+        return {
+          location: location.Address,
+          count: employeesCount,
+          percentage: percentage.toFixed(2), // Adjust decimal places as needed
+        };
+      });
+
+      res.status(200).json({
+        success: true,
+        data: {
+          totalEmployees,
+          locationChartData,
+        },
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "something went wrong",
+        error: error.message,
+      });
+    }
+  },
 };
 
 module.exports = employeeController;
