@@ -184,6 +184,41 @@ const employeeController = {
       });
     }
   },
+  // bulk data upload
+  addBulkEmployee: async (req, res, next) => {
+    try {
+      const { data } = req.body;
+      const employees = data.map((employeeData) => ({
+        EmployeeName: employeeData[0],
+        EmployeeStatus: employeeData[1],
+        JoiningDate: employeeData[2],
+        BirthDate: employeeData[3],
+        Skills: employeeData[4],
+        SalaryDetails: employeeData[5],
+        Address: employeeData[6],
+      }));
+
+      const updV = await prisma.employee.createMany({
+        data: employees,
+        skipDuplicates: true, // Skip insertion of duplicate entries
+      });
+
+      if (updV) {
+        return res.status(201).json({
+          success: true,
+          message: "Employees added successfully",
+        });
+      }
+
+      // res.status(201).json({ message: "Employees added successfully" });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "something went wrong",
+        error: error.message,
+      });
+    }
+  },
 };
 
 module.exports = employeeController;

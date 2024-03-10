@@ -7,5 +7,6 @@ router.get("/:eid", employeeController.getOneEmployee);
 router.put("/:eid", employeeController.updateEmployee);
 router.delete("/:eid", employeeController.deleteEmployee);
 router.get("/data/all", employeeController.getAllEmployee);
+router.post("/bulk-upload", employeeController.addBulkEmployee);
 
 module.exports = router;
