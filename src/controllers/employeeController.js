@@ -162,6 +162,28 @@ const employeeController = {
     }
   },
   // delete employee api
+  deleteEmployee: async (req, res) => {
+    const { eid } = req.params;
+
+    try {
+      const deletedEmployee = await prisma.employee.delete({
+        where: {
+          id: Number(eid),
+        },
+      });
+
+      return res
+        .status(200)
+        .json({ success: true, message: "data delete", data: deletedEmployee });
+    } catch (error) {
+      console.error("Error:", error);
+      return res.status(500).json({
+        success: false,
+        message: "something went wrong",
+        error: error.message,
+      });
+    }
+  },
 };
 
 module.exports = employeeController;
