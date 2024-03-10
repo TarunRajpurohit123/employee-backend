@@ -51,7 +51,79 @@ const employeeController = {
       });
     }
   },
-  
+  // get single employee
+  getOneEmployee: async (req, res) => {
+    const { eid } = req.params;
+    try {
+      const row = await prisma.employee.findUnique({
+        include: {
+          employeeStatus: {
+            select: {
+              status: true,
+            },
+          },
+        },
+        where: {
+          id: Number(eid),
+        },
+      });
+      if (!row) {
+        return res
+          .status(400)
+          .json({ success: false, message: "No data found" });
+      }
+      return res.status(200).json({ success: true, data: row });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "something went wrong",
+        error: error.message,
+      });
+    }
+  },
+  // get all employeedata
+  getAllEmployee: async (req, res) => {
+    const { statusId } = req.query;
+    console.log("he;;;p");
+    console.log("statusId", statusId);
+    try {
+      let query = {
+        include: {
+          employeeStatus: {
+            select: {
+              status: true,
+            },
+          },
+        },
+      };
+
+      if (statusId && statusId !== "0") {
+        query = {
+          ...query,
+          where: {
+            employeeStatusId: Number(statusId),
+          },
+        };
+      }
+      const allEmployees = await prisma.employee.findMany(query);
+      if (!allEmployees) {
+        return res.status(500).json({
+          success: false,
+          message: "no data found",
+        });
+      }
+      return res
+        .status(200)
+        .json({ message: "Employees List", data: allEmployees });
+    } catch (error) {
+      console.error("Error:", error);
+      return res.status(500).json({
+        success: false,
+        message: "something went wrong",
+        error: error.message,
+      });
+    }
+  },
 };
 
 module.exports = employeeController;
