@@ -4,6 +4,7 @@ const router = require("express").Router();
 
 router.post("/", validator, employeeController.addSingle);
 router.get("/:eid", employeeController.getOneEmployee);
-router.get("/all", employeeController.getAllEmployee);
+router.put("/:eid", employeeController.updateEmployee);
+router.get("/data/all", employeeController.getAllEmployee);
 
 module.exports = router;

@@ -124,6 +124,44 @@ const employeeController = {
       });
     }
   },
+  //update employee api
+  updateEmployee: async (req, res) => {
+    const { eid } = req.params;
+    try {
+      const employeeData = await prisma.employee.findUnique({
+        where: {
+          id: Number(eid),
+        },
+      });
+      if (!employeeData) {
+        return res
+          .status(400)
+          .json({ success: false, message: "No data found" });
+      }
+      const update = await prisma.employee.update({
+        data: req.body,
+        where: {
+          id: Number(eid),
+        },
+      });
+      if (!update) {
+        return res.status(400).json({
+          success: false,
+          message: "Data not update. Plase try again!",
+        });
+      }
+      return res
+        .status(200)
+        .json({ success: true, message: "data update successfully" });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "something went wrong",
+        error: error.message,
+      });
+    }
+  },
+  // delete employee api
 };
 
 module.exports = employeeController;
