@@ -188,18 +188,29 @@ const employeeController = {
   addBulkEmployee: async (req, res, next) => {
     try {
       const { data } = req.body;
-      const employees = data.map((employeeData) => ({
-        EmployeeName: employeeData[0],
-        EmployeeStatus: employeeData[1],
-        JoiningDate: employeeData[2],
-        BirthDate: employeeData[3],
-        Skills: employeeData[4],
-        SalaryDetails: employeeData[5],
-        Address: employeeData[6],
-      }));
+      const employees = data.map((employeeData, ind) => {
+        if(ind>0){
+          return {
+            EmployeeName: employeeData[0],
+            employeeStatusId: Number(employeeData[1]),
+            JoiningDate: employeeData[2],
+            BirthDate: employeeData[3],
+            Skills: employeeData[4],
+            SalaryDetails: Number(employeeData[5]),
+            Address: employeeData[6],
+          };
+        }
+      });
+
+      let realEmployee=[];
+      employees.forEach((element,ind) => {
+        if(ind>0){
+          realEmployee.push(element);
+        }
+      });
 
       const updV = await prisma.employee.createMany({
-        data: employees,
+        data: realEmployee,
         skipDuplicates: true, // Skip insertion of duplicate entries
       });
 
@@ -298,7 +309,7 @@ const employeeController = {
         })
       );
 
-      res.status(200).json({
+      return res.status(200).json({
         salaryChartData,
       });
     } catch (error) {
