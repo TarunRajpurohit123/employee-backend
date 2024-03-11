@@ -4,7 +4,11 @@ const employeeStatusController = {
   getAllStatus: async (_, res) => {
     try {
       const row = await prisma.employeeStatus.findMany();
-      return res.status(200).json({ success: false, data: row });
+      let customRow=[];
+      row.forEach((elm)=>{
+        customRow.push({label:elm.status,value:elm.id});
+      })
+      return res.status(200).json({ success: false, data: customRow });
     } catch (error) {
       return res.status(500).json({ success: false, message: error.message });
     }
