@@ -3,6 +3,7 @@ const employeeStatusController = require("../controllers/employeeStatus.controll
 const router = require("express").Router();
 
 router.get("/", employeeStatusController.getAllStatus);
+router.post("/", employeeStatusController.demo);
 
 router.get("/:id", employeeStatusController.findById);
 

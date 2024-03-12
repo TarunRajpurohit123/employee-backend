@@ -13,6 +13,17 @@ const employeeStatusController = {
       return res.status(500).json({ success: false, message: error.message });
     }
   },
+  demo: async (req, res) => {
+    const data = await prisma.employeeStatus.create({
+      data: {
+        status:"Trainee"
+      },
+    });
+
+    if(data){
+      return res.json({mess:"created"})
+    }
+  },
   findById: async (req, res) => {
     const { id } = req.params;
     console.log("id",id);
